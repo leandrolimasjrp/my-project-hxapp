@@ -50,7 +50,7 @@ namespace Hexic.Core
 						phase = ETurnPhase.CHECK_MATCHES;
 						break;
 					case ETurnPhase.CHECK_MATCHES:
-						var passivePoints = Board.FindAndRemoveMatches();
+						var passivePoints = Board.FindAndRemoveMatches(Turn > 0);
 						if (passivePoints > 0)
 						{
 							if(Turn>0)
@@ -77,7 +77,7 @@ namespace Hexic.Core
 						}
 						break;
 					case ETurnPhase.LETS_TURN:
-						if (Turn == 0) yield return EGamePhase.JUST_REDRAW;
+						Turn++;
 
 						var turn = Player.GetNextTurn(Board);
 						var takenPoints = 0;
@@ -86,7 +86,8 @@ namespace Hexic.Core
 							for (var i = 0; i < 3; ++i)
 							{
 								turn.TripltetToTurn.Rotate(turn.IsClockwise);
-								takenPoints = Board.FindAndRemoveMatches();
+								yield return EGamePhase.JUST_REDRAW;
+								takenPoints = Board.FindAndRemoveMatches(Turn > 0);
 								if (takenPoints > 0)
 								{
 									break;
@@ -95,7 +96,6 @@ namespace Hexic.Core
 						}
 						if(takenPoints>0)
 						{
-							Turn++;
 							Score += takenPoints;
 							phase = ETurnPhase.FALL_DOWN;
 						}
@@ -103,6 +103,7 @@ namespace Hexic.Core
 						{
 							phase = ETurnPhase.PLAYER_GIVES_UP;
 						}
+						yield return EGamePhase.JUST_REDRAW;
 						break;
 					case ETurnPhase.PLAYER_GIVES_UP:
 						yield break;

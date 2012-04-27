@@ -4,13 +4,17 @@ namespace Hexic.Current
 {
 	class HexValuesGenerator:IHexValuesGenerator
 	{
-		//initialized by constant seed to help debug project
-		private readonly Random m_rnd = new Random(1);
+		//initialize by constant seed to help debug project
+		private readonly Random m_rnd = new Random();
 
 		private readonly int m_numberOfVariants;
 
 		public HexValuesGenerator(int _numberOfVariants)
 		{
+			if(_numberOfVariants<3 || _numberOfVariants>7)
+			{
+				throw new ArgumentOutOfRangeException("_numberOfVariants should be in [3;7] range.");
+			}
 			m_numberOfVariants = _numberOfVariants;
 		}
 

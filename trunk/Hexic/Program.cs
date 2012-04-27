@@ -6,9 +6,11 @@ namespace Hexic
 {
     class Program
     {
-        static void Main()
+		const int NUMBER_OF_COLORS = 7;
+
+		static void Main()
         {
-			var game = new Game(new HexValuesGenerator(3), new SimplestPlayer());
+			var game = new Game(new HexValuesGenerator(NUMBER_OF_COLORS), new SimplestPlayer());
 			var renderer = new ConsoleBwRenderer(game);
 
 			//CheckAllGeneratedTriplets(renderer, game.Board);
@@ -35,10 +37,6 @@ namespace Hexic
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
-				}
-				if (turnMode)
-				{
-					turnMode = Console.ReadKey(true).Key != ConsoleKey.A;
 				}
 			}
 			Console.WriteLine(_game.Player + " gives up.");
