@@ -4,6 +4,6 @@ namespace Hexic
 {
 	public interface IPlayer
 	{
-		Triplet GetTripletToRotate(Board _board);
+		PlayersTurn GetNextTurn(Board _board);
 	}
 }

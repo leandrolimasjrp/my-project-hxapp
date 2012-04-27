@@ -73,26 +73,27 @@ namespace Hexic.Core
 
 		private IEnumerable<Triplet> GetCellTriplets(int _col, int _row)
 		{
-			var neighbours = new[]
-			                 	{
+			var result = new List<Triplet>();
+			Action<Tuple<int, int>[]> checkAndAdd = delegate(Tuple<int, int>[] _tuples)
+			                                	{
+													if (_tuples.All(_tuple => IsCellValid(_tuple.Item1, _tuple.Item2)))
+													{
+														result.Add(new Triplet(_tuples.Select(_tuple => Cells[_tuple.Item1, _tuple.Item2])));
+													}
+			                                	};
 
-			                 		Tuple.Create(_col - (_row & 1), _row - 1),
-			                 		Tuple.Create(_col, _row - 2),
-			                 		Tuple.Create(_col + ((_row ^ 1) & 1), _row - 1),
-			                 		Tuple.Create(_col + ((_row ^ 1) & 1), _row + 1),
-			                 		Tuple.Create(_col, _row + 2),
-			                 		Tuple.Create(_col - (_row & 1), _row + 1),
-			                 	};
-
-			var center = Tuple.Create(_col, _row);
-			for (var i = 0; i < 6; ++i)
+			if ((_row & 1) == 1)
 			{
-				var tuples = new[] { neighbours[i], neighbours[(i + 1) % 6], center };
-				if (tuples.All(_tuple => IsCellValid(_tuple.Item1, _tuple.Item2)))
-				{
-					yield return new Triplet(tuples.Select(_tuple => Cells[_tuple.Item1, _tuple.Item2]));
-				}
+				checkAndAdd(new[] { Tuple.Create(_col, _row), Tuple.Create(_col + ((_row ^ 1) & 1), _row - 1), Tuple.Create(_col + ((_row ^ 1) & 1), _row + 1) });
+				checkAndAdd(new[] { Tuple.Create(_col, _row), Tuple.Create(_col, _row + 2), Tuple.Create(_col + ((_row ^ 1) & 1), _row + 1) });
 			}
+			else
+			{
+				checkAndAdd(new[] { Tuple.Create(_col, _row), Tuple.Create(_col + ((_row ^ 1) & 1), _row - 1), Tuple.Create(_col + ((_row ^ 1) & 1), _row + 1) });
+				checkAndAdd(new[] { Tuple.Create(_col, _row), Tuple.Create(_col + 1, _row + 1), Tuple.Create(_col, _row + 2) });
+			}
+
+			return result;
 		}
 
 		internal bool IsCellValid(int _x, int _y)
@@ -119,9 +120,9 @@ namespace Hexic.Core
 			return result;
 		}
 
-		public int CheckMatches()
+		public int FindAndRemoveMatches()
 		{
-			var matches = Triplets.GroupBy(_triplet => _triplet.MatchColor);
+			var matches = Triplets.GroupBy(_triplet => _triplet.Match3Color);
 			var united = new List<int>();
 			var toCheck = new List<int>();
 			var toAdd = new List<int>();
@@ -134,27 +135,30 @@ namespace Hexic.Core
 					continue;
 				}
 
-				var triplets = group.Select(_triplet => _triplet.Index).ToList();
-				while(triplets.Count>0)
+				var matched = group.Select(_triplet => _triplet.Index).ToList();
+				while(matched.Count>0)
 				{
 					united.Clear();
 					
-					united.Add(triplets[0]);
+					united.Add(matched[0]);
 
-					
-
-					toCheck.Add(triplets[0]);
+					toCheck.Add(matched[0]);
 					do
 					{
 						toAdd.Clear();
 						foreach (var i in toCheck)
 						{
-							toAdd.AddRange(triplets.Where(_j => united.Contains(_j) && m_tripletsNeighbours[i, _j]));
+							toAdd.AddRange(matched.Where(_j => !united.Contains(_j) && m_tripletsNeighbours[i, _j]));
 						}
 						united.AddRange(toAdd);
 						toCheck.Clear();
 						toCheck.AddRange(toAdd);
 					} while (toAdd.Count > 0);
+
+					foreach (var i in united)
+					{
+						Debug.WriteLine(Triplets[i]);
+					}
 
 					var pow = (int) Math.Pow(3, united.Count);
 					Debug.WriteLine("* matches " + united.Count + " triplets, v=" + Triplets[united[0]].Cells[0].Value + ", gained " + pow + " points.");
@@ -167,7 +171,7 @@ namespace Hexic.Core
 						{
 							cell.Clear();
 						}
-						triplets.Remove(i);
+						matched.Remove(i);
 					}
 				}
 			}
@@ -192,6 +196,37 @@ namespace Hexic.Core
 					}
 				}
 			} while (flag);
+		}
+
+		public int FindAndRemoveMatchesTotal()
+		{
+			var points = 0;
+			var phase = Game.ETurnPhase.CHECK_MATCHES;
+			do
+			{
+				Debug.WriteLine(phase);
+				switch (phase)
+				{
+					case Game.ETurnPhase.FALL_DOWN:
+						FallCells();
+						phase = Game.ETurnPhase.CHECK_MATCHES;
+						break;
+					case Game.ETurnPhase.CHECK_MATCHES:
+						var toAdd = FindAndRemoveMatches();
+						if(toAdd>0)
+						{
+							points += toAdd;
+							phase = Game.ETurnPhase.FALL_DOWN;
+						}
+						else
+						{
+							return points;
+						}
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			} while (true);
 		}
 	}
 }
