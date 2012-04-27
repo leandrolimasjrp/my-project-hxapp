@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\PlayersTurn.cs" />
     <Compile Include="Current\ConsoleBwRenderer.cs" />
     <Compile Include="Core\Board.cs" />
     <Compile Include="Core\Cell.cs" />
@@ -51,7 +52,7 @@
     <Compile Include="Core\Triplet.cs" />
     <Compile Include="IHexValuesGenerator.cs" />
     <Compile Include="IRenderer.cs" />
-    <Compile Include="Current\Player.cs" />
+    <Compile Include="Current\SimplestPlayer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="IPlayer.cs" />

@@ -7,13 +7,15 @@ namespace Hexic.Current
 	class ConsoleBwRenderer : IRenderer
 	{
 		private readonly Game m_game;
-		private readonly string[] m_chars = new[] { " ", new string((char)1, 1), new string((char)2, 1), "*", "@", "#" };
+		private readonly string[] m_chars = new[] { " ", new string((char)1, 1), new string((char)2, 1), "*", "@", "#", "+", "." };
 
 		private string m_prevState = String.Empty;
 
 		public ConsoleBwRenderer(Game _game)
 		{
 			m_game = _game;
+			Console.SetWindowSize(50,50);
+			Console.SetBufferSize(50, 50);
 		}
 
 		public void Render()

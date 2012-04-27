@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Hexic.Current;
 
 namespace Hexic.Core
 {
@@ -9,11 +8,12 @@ namespace Hexic.Core
 	{
 		public enum EGamePhase
 		{
+			BOARD_PREPARE,
 			JUST_REDRAW,
 			TURN_DONE,
 		}
 
-		private enum ETurnPhase
+		public enum ETurnPhase
 		{
 			FALL_DOWN,
 			CHECK_MATCHES,
@@ -22,17 +22,17 @@ namespace Hexic.Core
 			PLAYER_GIVES_UP,
 		}
 
-		private readonly Player m_player;
-
 		public Board Board { get; private set; }
 
 		public int Score { get; private set; }
 
 		public int Turn { get; private set; }
 
-		public Game(IHexValuesGenerator _hexValuesGenerator, Player _player)
+		public IPlayer Player { get; private set; }
+
+		public Game(IHexValuesGenerator _hexValuesGenerator, IPlayer _player)
 		{
-			m_player = _player;
+			Player = _player;
 			Board = new Board(_hexValuesGenerator);
 		}
 
@@ -46,16 +46,19 @@ namespace Hexic.Core
 				{
 					case ETurnPhase.FALL_DOWN:
 						Board.FallCells();
-						yield return EGamePhase.JUST_REDRAW;
+						yield return Turn > 0 ? EGamePhase.JUST_REDRAW : EGamePhase.BOARD_PREPARE;
 						phase = ETurnPhase.CHECK_MATCHES;
 						break;
 					case ETurnPhase.CHECK_MATCHES:
-						var passivePoints = Board.CheckMatches();
+						var passivePoints = Board.FindAndRemoveMatches();
 						if (passivePoints > 0)
 						{
-							Score += passivePoints;
+							if(Turn>0)
+							{
+								Score += passivePoints;
+							}
 							phase = ETurnPhase.FALL_DOWN;
-							yield return EGamePhase.JUST_REDRAW;
+							yield return Turn > 0 ? EGamePhase.JUST_REDRAW : EGamePhase.BOARD_PREPARE;
 						}
 						else
 						{
@@ -65,7 +68,7 @@ namespace Hexic.Core
 					case ETurnPhase.FILL_EMPTY_CELLS:
 						if(Board.FillEmptyCells())
 						{
-							yield return EGamePhase.JUST_REDRAW;
+							yield return Turn > 0 ? EGamePhase.JUST_REDRAW : EGamePhase.BOARD_PREPARE;
 							phase = ETurnPhase.CHECK_MATCHES;
 						}
 						else
@@ -74,14 +77,16 @@ namespace Hexic.Core
 						}
 						break;
 					case ETurnPhase.LETS_TURN:
-						var triplet = m_player.GetTripletToRotate(Board);
+						if (Turn == 0) yield return EGamePhase.JUST_REDRAW;
+
+						var turn = Player.GetNextTurn(Board);
 						var takenPoints = 0;
-						if (triplet != null)
+						if (turn != null)
 						{
 							for (var i = 0; i < 3; ++i)
 							{
-								triplet.Rotate();
-								takenPoints = Board.CheckMatches();
+								turn.TripltetToTurn.Rotate(turn.IsClockwise);
+								takenPoints = Board.FindAndRemoveMatches();
 								if (takenPoints > 0)
 								{
 									break;
