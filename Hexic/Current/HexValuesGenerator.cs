@@ -4,7 +4,9 @@ namespace Hexic.Current
 {
 	class HexValuesGenerator:IHexValuesGenerator
 	{
-		private readonly Random m_rnd = new Random();
+		//initialized by constant seed to help debug project
+		private readonly Random m_rnd = new Random(1);
+
 		private readonly int m_numberOfVariants;
 
 		public HexValuesGenerator(int _numberOfVariants)

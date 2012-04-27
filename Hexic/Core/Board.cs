@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Hexic.Core
@@ -139,6 +140,9 @@ namespace Hexic.Core
 					united.Clear();
 					
 					united.Add(triplets[0]);
+
+					
+
 					toCheck.Add(triplets[0]);
 					do
 					{
@@ -152,12 +156,11 @@ namespace Hexic.Core
 						toCheck.AddRange(toAdd);
 					} while (toAdd.Count > 0);
 
-					if (united.Distinct().Count() < united.Count)
-					{
-						throw new NotImplementedException();
-					}
+					var pow = (int) Math.Pow(3, united.Count);
+					Debug.WriteLine("* matches " + united.Count + " triplets, v=" + Triplets[united[0]].Cells[0].Value + ", gained " + pow + " points.");
 
-					points += (int)Math.Pow(3, united.Count());
+					points += pow;
+
 					foreach (var i in united)
 					{
 						foreach (var cell in Triplets[i].Cells)
