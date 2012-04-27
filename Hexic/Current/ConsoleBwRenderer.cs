@@ -7,6 +7,8 @@ namespace Hexic.Current
 	class ConsoleBwRenderer : IRenderer
 	{
 		private readonly Game m_game;
+		private bool m_turnMode = true;
+
 		private readonly string[] m_chars = new[] { " ", new string((char)1, 1), new string((char)2, 1), "*", "@", "#", "+", "." };
 
 		private string m_prevState = String.Empty;
@@ -29,7 +31,7 @@ namespace Hexic.Current
 
 			var sb = new StringBuilder();
 
-			sb.AppendLine(string.Format("Score: {0:0000000}\t\t Turn:{1:00000000}", m_game.Score, m_game.Turn));
+			sb.AppendLine(string.Format("Score: {0:000000000000}\t\t Turn:{1:0000}", m_game.Score, m_game.Turn));
 			sb.AppendLine(@"   _   _   _   _   _");
 			
 			for (var row = 0; row < Board.TOTAL_ROWS; ++row)
@@ -57,7 +59,21 @@ namespace Hexic.Current
 			m_prevState = sb.ToString();
 
 			Console.WriteLine(m_prevState);
-			Console.WriteLine("Press 'a' to exit form turn-by-turn mode.");
+
+			if (m_turnMode)
+			{
+				Console.WriteLine("Press 'a' to exit form turn-by-turn mode.");
+				m_turnMode = Console.ReadKey(true).Key != ConsoleKey.A;
+			}
+			else
+			{
+				Console.WriteLine("Press 'a' to return to turn-by-turn mode.");
+				if(Console.KeyAvailable)
+				{
+					m_turnMode = Console.ReadKey(true).Key == ConsoleKey.A;
+				}
+			}
+
 		}
 	}
 }

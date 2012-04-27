@@ -32,12 +32,19 @@ namespace Hexic.Current
 				foreach (var clockwise in new[]{false,true})
 				{
 					BeginAnalyze(_board);
-					triplet.Rotate(clockwise);
-					var points = _board.FindAndRemoveMatchesTotal();
-					if(points>maxPoints)
+					for (var i = 0; i < 2; ++i)
 					{
-						maxPoints = points;
-						result = new PlayersTurn(triplet, clockwise);
+						triplet.Rotate(clockwise);
+						var points = _board.FindAndRemoveMatchesTotal();
+						if (points > 0)
+						{
+							if (points > maxPoints)
+							{
+								maxPoints = points;
+								result = new PlayersTurn(triplet, clockwise);
+							}
+							break;
+						}
 					}
 				}
 			}

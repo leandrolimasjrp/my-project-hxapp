@@ -120,7 +120,7 @@ namespace Hexic.Core
 			return result;
 		}
 
-		public int FindAndRemoveMatches()
+		public int FindAndRemoveMatches(bool _printDebugInfo)
 		{
 			var matches = Triplets.GroupBy(_triplet => _triplet.Match3Color);
 			var united = new List<int>();
@@ -155,13 +155,16 @@ namespace Hexic.Core
 						toCheck.AddRange(toAdd);
 					} while (toAdd.Count > 0);
 
-					foreach (var i in united)
+					var pow = (int)Math.Pow(3, united.Count);
+					if (_printDebugInfo)
 					{
-						Debug.WriteLine(Triplets[i]);
-					}
+						foreach (var i in united)
+						{
+							Debug.WriteLine(Triplets[i]);
+						}
 
-					var pow = (int) Math.Pow(3, united.Count);
-					Debug.WriteLine("* matches " + united.Count + " triplets, v=" + Triplets[united[0]].Cells[0].Value + ", gained " + pow + " points.");
+						Debug.WriteLine("* matches " + united.Count + " triplets, v=" + Triplets[united[0]].Cells[0].Value + ", gained " + pow + " points.");
+					}
 
 					points += pow;
 
@@ -204,7 +207,6 @@ namespace Hexic.Core
 			var phase = Game.ETurnPhase.CHECK_MATCHES;
 			do
 			{
-				Debug.WriteLine(phase);
 				switch (phase)
 				{
 					case Game.ETurnPhase.FALL_DOWN:
@@ -212,7 +214,7 @@ namespace Hexic.Core
 						phase = Game.ETurnPhase.CHECK_MATCHES;
 						break;
 					case Game.ETurnPhase.CHECK_MATCHES:
-						var toAdd = FindAndRemoveMatches();
+						var toAdd = FindAndRemoveMatches(false);
 						if(toAdd>0)
 						{
 							points += toAdd;
