@@ -6,7 +6,7 @@ namespace Hexic
 {
     class Program
     {
-		const int NUMBER_OF_COLORS = 7;
+		const int NUMBER_OF_COLORS = 6;
 
 		static void Main()
         {
