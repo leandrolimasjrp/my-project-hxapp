@@ -24,7 +24,7 @@ namespace Hexic.Core
 
 		public Board Board { get; private set; }
 
-		public int Score { get; private set; }
+		public long Score { get; private set; }
 
 		public int Turn { get; private set; }
 
